@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Top 5 Rented Films</title>
+</head>
+<body>
+    <h1>Top 5 Rented Films</h1>
+    <ul>
+        {% for film in films %}
+            <li>
+                {{ film[1] }} — Rented {{ film[2] }} times
+            </li>
+        {% endfor %}
+    </ul>
+</body>
+</html>
