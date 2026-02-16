@@ -1,12 +1,33 @@
-from flask import Flask, render_template
+from flask import Flask, render_template, jsonify
 from sakiladb import top_rented
+from sakiladb import top_actors
+from sakiladb import rented_details
+from sakiladb import actor_details
 
 app = Flask(__name__)
 
 @app.route("/")  # homepage
 def home():
     films = top_rented()  # run query
-    return render_template("index.html", films=films)  # pass results to HTML
+    actors = top_actors()
+    return render_template("index.html", films=films, actors=actors)  # pass results to HTML
+
+@app.route("/topfilms")
+def topfilms():
+    return jsonify(top_rented())
+
+@app.route("/topactors")
+def topactors():
+    return jsonify(top_actors())
+
+@app.route("/topfilms/<int:film_id>") # details page for films
+def filmdetails(film_id):
+    return jsonify(rented_details())
+
+@app.route("/topactors/<int:actor_id>") # details page for actors
+def actordetails(actor_id):
+    return jsonify(actor_details())
+
 
 if __name__ == "__main__":
     app.run(debug=True)

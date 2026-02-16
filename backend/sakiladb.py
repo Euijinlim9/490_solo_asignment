@@ -14,13 +14,13 @@ def top_rented():
     conn = get_connection()
     cursor = conn.cursor() 
     cursor.execute("""
-        SELECT f.film_id, f.title, COUNT(r.rental_id) AS rental_count
-        FROM film f
-        JOIN inventory i ON f.film_id = i.film_id
-        JOIN rental r ON i.inventory_id = r.inventory_id
-        GROUP BY f.film_id
-        ORDER BY rental_count DESC
-        LIMIT 5;
+                   SELECT f.film_id, f.title, c.category_id, COUNT(r.rental_id) as rented
+                    FROM rental as r
+                    JOIN inventory as i on r.inventory_id = i.inventory_id
+                    JOIN film as f on i.film_id = f.film_id
+                    JOIN film_category as c on f.film_id = c.film_id
+                    GROUP BY f.film_id, f.title, c.category_id
+                    ORDER BY rented desc limit 5;
     """)
     result = cursor.fetchall() # gets all result from database as tuples
     cursor.close()
@@ -48,11 +48,49 @@ def rented_details():
     cursor.close()
     conn.close()
     
-    return result;
+    return result
 
 # query for top actors based on rental amount
-#def top_actors():
-
+def top_actors():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+                   SELECT a.first_name, a.last_name, COUNT(r.rental_id) as rented
+                   FROM actor a
+                   JOIN film_actor fa on a.actor_id = fa.actor_id
+                   JOIN film f on fa.film_id = f.film_id
+                   JOIN inventory i on f.film_id = i.film_id
+                   JOIN rental r on i.inventory_id = r.inventory_id
+                   GROUP BY a.first_name, a.last_name
+                   ORDER BY rented DESC limit 5;
+    """)
     
-# top 5 actors details
-#def actors_details():
+    result = cursor.fetchall() 
+    cursor.close()
+    conn.close()
+    
+    return result;
+
+# top 5 actors details and their top 5 most rented movies
+def actor_details():
+        
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+                       SELECT a.actor_id, a.first_name, a.last_name, f.film_id, f.title, COUNT(r.rental_id) as rented
+                       FROM actor a
+                       JOIN film_actor fa on a.actor_id = fa.actor_id
+                       JOIN film f on fa.film_id = f.film_id
+                       JOIN inventory i on f.film_id = i.film_id
+                       JOIN rental r on i.inventory_id = r.inventory_id
+                       WHERE a.actor_id = %s
+                       GROUP BY a.actor_id, a.first_name, a.last_name, f.film_id, f.title
+                       ORDER BY rented desc limit 5;
+                       
+    """, (actor_id,))
+    
+        result = cursor.fetchone() 
+        cursor.close()
+        conn.close()
+
+        return result;

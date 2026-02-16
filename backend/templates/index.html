@@ -1,14 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Top 5 Rented Films</title>
+    <title>Landing Page</title>
 </head>
 <body>
-    <h1>Top 5 Rented Films</h1>
+    <h1>Top 5 Films</h1>
     <ul>
         {% for film in films %}
             <li>
-                {{ film[1] }} — Rented {{ film[2] }} times
+                {{ film[1] }} has been rented {{ film[2] }} times.
+            </li>
+        {% endfor %}
+    </ul>
+        <h1>Top 5 Actors</h1>
+    <ul>
+        {% for actor in actors %}
+            <li>
+                {{ actor[0] }} {{ actor[1] }} — Starred in {{ actor[2] }} movies.
             </li>
         {% endfor %}
     </ul>
