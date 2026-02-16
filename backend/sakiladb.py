@@ -14,12 +14,12 @@ def top_rented():
     conn = get_connection()
     cursor = conn.cursor() 
     cursor.execute("""
-                   SELECT f.film_id, f.title, c.category_id, COUNT(r.rental_id) as rented
+                   SELECT f.film_id, f.title, COUNT(r.rental_id) as rented
                     FROM rental as r
                     JOIN inventory as i on r.inventory_id = i.inventory_id
                     JOIN film as f on i.film_id = f.film_id
                     JOIN film_category as c on f.film_id = c.film_id
-                    GROUP BY f.film_id, f.title, c.category_id
+                    GROUP BY f.film_id, f.title
                     ORDER BY rented desc limit 5;
     """)
     result = cursor.fetchall() # gets all result from database as tuples

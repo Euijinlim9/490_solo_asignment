@@ -1,10 +1,12 @@
 from flask import Flask, render_template, jsonify
+from flask_cors import CORS
 from sakiladb import top_rented
 from sakiladb import top_actors
 from sakiladb import rented_details
 from sakiladb import actor_details
 
 app = Flask(__name__)
+CORS(app)
 
 @app.route("/")  # homepage
 def home():
@@ -14,7 +16,15 @@ def home():
 
 @app.route("/topfilms")
 def topfilms():
-    return jsonify(top_rented())
+    films = top_rented()
+    results = []
+    for f in films:
+        results.append({
+            "film_id": f[0],
+            "title": f[1]
+        })
+
+    return jsonify(results)
 
 @app.route("/topactors")
 def topactors():
