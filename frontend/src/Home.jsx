@@ -1,31 +1,18 @@
 import React from "react";
 import { Link } from "react-router-dom";
+import './format.css';
 
 function HomePage(){
     return (
         <>
         <title> Sakila Films </title>
-        <FilmButton />
-        <ActorButton />
-        <h1>Welcome to Sakila Films</h1>
-        <p>The database website to view all your favorite films!</p>
+        <div className="centered">
+            <div>
+                <h1>Welcome to Sakila Films</h1>
+                <p>The database website to view all your favorite films!</p>
+            </div>
+        </div>
         </> 
-    );
-}
-
-function FilmButton(){
-    return (
-        <Link to="/topfilms">
-        <button>Top 5 Films</button>
-        </Link>
-    );
-}
-
-function ActorButton(){
-    return(
-        <Link to="/topactors">
-        <button>Top 5 Actors</button>
-        </Link>
     );
 }
 

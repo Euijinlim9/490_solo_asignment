@@ -18,29 +18,32 @@ function ActorPage() {
       });
   }, []);
 
-  if (loading) return <p>Loading actors...</p>;
-
-  if (actors.length === 0) return <p>No actors found.</p>;
+  if (loading) {
+    return (
+  <div className="centered">
+      <h2>Loading actors...</h2>
+  </div>
+    );
+  }
+  if (actors.length === 0) { //covers edge case where if no actors found in database, show error
+    return (
+    <div className="centered">
+        <h2>No actors found.</h2>;
+  </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Top 5 Actors</h1>
-
+    <div className="centered">
+      <h1>Top 5 Actors</h1>
+      <div className="film-list">
       {actors.map((actors) => (
-        <div
-          key={actors.actor_id}
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            padding: "10px",
-            textAlign: "center",
-            marginBottom: "15px",
-          }}
-        >
+        <div className="film-card" key={actors.actor_id}>
           <h3>{actors.first_name} {actors.last_name}</h3>
           <ViewButton actor_id={actors.actor_id} />
         </div>
       ))}
+    </div>
     </div>
   );
 }

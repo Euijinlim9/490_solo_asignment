@@ -1,10 +1,10 @@
 import mysql.connector
 
-def get_connection():
-    return mysql.connector.connect(
+def get_connection(): # connect to sakila database
+    return mysql.connector.connect( 
         host="localhost",
         user="root",
-        password="cs490",
+        password="cs490", # use your own password and credentials
         database="sakila"
     )
 

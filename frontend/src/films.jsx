@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
+import './format.css';
 
 function FilmPage() {
   const [films, setFilms] = useState([]);
@@ -18,29 +19,32 @@ function FilmPage() {
       });
   }, []);
 
-  if (loading) return <p>Loading films...</p>;
-
-  if (films.length === 0) return <p>No films found.</p>;
+  if (loading) {
+    return (
+  <div className="centered">
+      <h2>Loading films...</h2>
+  </div>
+    );
+  }
+  if (films.length === 0) {  //covers edge case where if no films found in database, show error
+    return (
+    <div className="centered">
+        <h2>No films found.</h2>
+  </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "20px" }}>Top 5 Films</h1>
-
+    <div className="centered">
+      <h1>Top 5 Films</h1>
+      <div className="film-list">
       {films.map((film) => (
-        <div
-          key={film.film_id}
-          style={{
-            border: "1px solid #ddd",
-            borderRadius: "10px",
-            padding: "10px",
-            textAlign: "center",
-            marginBottom: "15px",
-          }}
-        >
+        <div className="film-card" key={film.film_id}>
           <h3>{film.title}</h3>
           <ViewButton film_id={film.film_id} />
         </div>
       ))}
+    </div>
     </div>
   );
 }

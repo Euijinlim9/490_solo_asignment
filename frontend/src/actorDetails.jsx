@@ -13,21 +13,30 @@ function ActorDetails() {
             setActors(data);
             setLoading(false);
       })
-      .catch((err) => {
+      .catch((err) => { // if error, loads it onto console and stops
         console.error("Error fetching actor details:", err);
         setLoading(false);
       });
   }, [actor_id]);
 
-  if (loading) return <p>Loading actor details...</p>;
-
-  if (actors.length === 0) return <p>No information found.</p>;
+    if (loading) {
+    return (
+  <div className="centered">
+      <h2>Loading actors details...</h2>
+  </div>
+    );
+  }
+  if (actors.length === 0) { //covers edge case where if no actor details found in database, show error
+    return (
+    <div className="centered">
+        <h2>No information found.</h2>;
+  </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "10px" }}>
-        {actors[0].first_name} {actors[0].last_name}
-      </h1>
+    <div className="centered">
+      <h1> {actors[0].first_name} {actors[0].last_name} </h1>
       <h2>Top 5 Films:</h2>
       <div style={{ lineHeight: "1.6" }}>
         {actors.map((film) => (

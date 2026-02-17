@@ -19,26 +19,35 @@ function FilmDetails() {
       });
   }, [film_id]);
 
-  if (loading) return <p>Loading film details...</p>;
-
-  if (films.length === 0) return <p>No information found.</p>;
+    if (loading) {
+    return (
+  <div className="centered">
+      <h2>Loading film detail...</h2>
+  </div>
+    );
+  }
+  if (films.length === 0) { //covers edge case where if no film detail found in database, show error
+    return (
+    <div className="centered">
+        <h2>No information found.</h2>;
+  </div>
+    );
+  }
 
   return (
-    <div style={{ maxWidth: "600px", margin: "0 auto", padding: "20px" }}>
-      <h1 style={{ textAlign: "center", marginBottom: "10px" }}>
-        {films[0]?.title}
-      </h1>
-      <h2>Film Information:</h2>
+    <div className="centered">
+      <h1>{films[0]?.title}</h1>
+      <h2>Film Information</h2>
       <div style={{ lineHeight: "1.6" }}>
         {films.map((film) => (
-          <div key={film.film_id}> {/* shows film title, description, release year, actor name, and language */}
+          <div key={film.film_id}> {/* shows film title, description, release year, actor name, rating, duration and language */}
             <p>Film Name: {film.title}</p>
             <p> Actors:{" "}
 
-                {film.actor.map((a, index) => (
+                {film.actor.map((a, index) => ( //loop through actors array
                 <span key={index}>
                 {a.first_name} {a.last_name}
-                {index < film.actor.length - 1 ? ", " : ""}
+                {index < film.actor.length - 1 ? ", " : ""} {/* add a comma if last index not reached, if last index add nothing*/}
                 </span>
             ))}
             </p>

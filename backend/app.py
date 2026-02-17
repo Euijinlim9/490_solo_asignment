@@ -33,7 +33,7 @@ def topactors():
         })
     return jsonify(results)
 
-@app.route("/topfilms/<int:film_id>") # shows film id, title, description, release year, actor name, and language
+@app.route("/topfilms/<int:film_id>") # shows film id, title, description, release year, actor name, language and rating
 def filmdetails(film_id):
     f_details = rented_details(film_id)
     results = []
