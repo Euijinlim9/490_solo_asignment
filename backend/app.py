@@ -8,13 +8,7 @@ from sakiladb import actor_details
 app = Flask(__name__)
 CORS(app)
 
-@app.route("/")  # homepage
-def home():
-    films = top_rented()  # run query
-    actors = top_actors()
-    return render_template("index.html", films=films, actors=actors)  # pass results to HTML
-
-@app.route("/topfilms")
+@app.route("/topfilms") # top films page
 def topfilms():
     films = top_rented()
     results = []
@@ -26,17 +20,51 @@ def topfilms():
 
     return jsonify(results)
 
-@app.route("/topactors")
+@app.route("/topactors") # top actors page
 def topactors():
-    return jsonify(top_actors())
+        
+    actors = top_actors()
+    results = []
+    for a in actors:
+        results.append({
+            "actor_id": a[0],
+            "first_name": a[1],
+            "last_name": a[2]
+        })
+    return jsonify(results)
 
-@app.route("/topfilms/<int:film_id>") # details page for films
+@app.route("/topfilms/<int:film_id>") # shows film id, title, description, release year, actor name, and language
 def filmdetails(film_id):
-    return jsonify(rented_details())
+    f_details = rented_details(film_id)
+    results = []
+    for f in f_details:
+        results.append({
+            "film_id": f[0],
+            "title": f[1],
+            "actor": [{"first_name": name.split()[0], "last_name": " ".join(name.split()[1:])} for name in f[2].split(", ")],
+            "description": f[3],
+            "release_year": f[4],
+            "language": f[5],
+            "length": f[6], 
+            "rating": f[7],
 
-@app.route("/topactors/<int:actor_id>") # details page for actors
+        })
+    return jsonify(results)
+
+@app.route("/topactors/<int:actor_id>") # shows name and most rented films
 def actordetails(actor_id):
-    return jsonify(actor_details())
+    a_detail = actor_details(actor_id)
+    results = []
+    for a in a_detail:
+        results.append({
+            "actor_id": a[0],
+            "first_name": a[1],
+            "last_name": a[2],
+            "film_id": a[3],
+            "title": a[4],
+            "rented": a[5]
+        })
+    return jsonify(results)
 
 
 if __name__ == "__main__":

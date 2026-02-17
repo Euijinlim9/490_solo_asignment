@@ -6,7 +6,7 @@ function FilmPage() {
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    fetch("http://localhost:5000/topfilms") // make sure Flask runs on 5000
+    fetch("http://localhost:5000/topfilms") // where flask runs on 5000
       .then((res) => res.json())
       .then((data) => {
         setFilms(data);
