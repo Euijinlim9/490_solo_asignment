@@ -1,10 +1,10 @@
 import mysql.connector
 
-def get_connection(): # connect to sakila database
+def get_connection():
     return mysql.connector.connect( 
         host="localhost",
         user="root",
-        password="cs490", # use your own password and credentials
+        password="1234",
         database="sakila"
     )
 
@@ -22,11 +22,97 @@ def top_rented():
                     GROUP BY f.film_id, f.title
                     ORDER BY rented desc limit 5;
     """)
-    result = cursor.fetchall() # gets all result from database as tuples
+    result = cursor.fetchall()
     cursor.close()
     conn.close()
     
     return result;
+
+# jimmy's portion - search films
+def search_films(query, search_type):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    if search_type == 'film':
+        cursor.execute("""
+            SELECT DISTINCT f.film_id, f.title, f.release_year, f.rental_rate,
+                   (SELECT COUNT(*) FROM inventory i 
+                    LEFT JOIN rental r ON i.inventory_id = r.inventory_id AND r.return_date IS NULL
+                    WHERE i.film_id = f.film_id AND r.rental_id IS NULL) as available_copies
+            FROM film f
+            WHERE f.title LIKE %s
+        """, (f'%{query}%',))
+    elif search_type == 'actor':
+        cursor.execute("""
+            SELECT DISTINCT f.film_id, f.title, f.release_year, f.rental_rate,
+                   (SELECT COUNT(*) FROM inventory i 
+                    LEFT JOIN rental r ON i.inventory_id = r.inventory_id AND r.return_date IS NULL
+                    WHERE i.film_id = f.film_id AND r.rental_id IS NULL) as available_copies
+            FROM film f
+            JOIN film_actor fa ON f.film_id = fa.film_id
+            JOIN actor a ON fa.actor_id = a.actor_id
+            WHERE a.first_name LIKE %s OR a.last_name LIKE %s
+        """, (f'%{query}%', f'%{query}%'))
+    elif search_type == 'genre':
+        cursor.execute("""
+            SELECT DISTINCT f.film_id, f.title, f.release_year, f.rental_rate,
+                   (SELECT COUNT(*) FROM inventory i 
+                    LEFT JOIN rental r ON i.inventory_id = r.inventory_id AND r.return_date IS NULL
+                    WHERE i.film_id = f.film_id AND r.rental_id IS NULL) as available_copies
+            FROM film f
+            JOIN film_category fc ON f.film_id = fc.film_id
+            JOIN category c ON fc.category_id = c.category_id
+            WHERE c.name LIKE %s
+        """, (f'%{query}%',))
+    
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+# jimmy's portion - get customers for rental
+def get_customers():
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        SELECT customer_id, first_name, last_name
+        FROM customer
+        ORDER BY last_name, first_name
+    """)
+    result = cursor.fetchall()
+    cursor.close()
+    conn.close()
+    return result
+
+# jimmy's portion - create rental
+def create_rental(film_id, customer_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    
+    cursor.execute("""
+        SELECT i.inventory_id 
+        FROM inventory i
+        LEFT JOIN rental r ON i.inventory_id = r.inventory_id AND r.return_date IS NULL
+        WHERE i.film_id = %s AND r.rental_id IS NULL
+        LIMIT 1
+    """, (film_id,))
+    inventory = cursor.fetchone()
+    
+    if not inventory:
+        cursor.close()
+        conn.close()
+        return None
+    
+    cursor.execute("""
+        INSERT INTO rental (rental_date, inventory_id, customer_id, staff_id)
+        VALUES (NOW(), %s, %s, 1)
+    """, (inventory[0], customer_id))
+    
+    conn.commit()
+    rental_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return rental_id
 
 # query for top 5 films details
 # shows film id, title, description, release year, actor name, language, length, rating, and special features

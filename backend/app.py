@@ -1,9 +1,12 @@
-from flask import Flask, render_template, jsonify
+from flask import Flask, render_template, jsonify, request
 from flask_cors import CORS
 from sakiladb import top_rented
 from sakiladb import top_actors
 from sakiladb import rented_details
 from sakiladb import actor_details
+from sakiladb import search_films
+from sakiladb import get_customers
+from sakiladb import create_rental
 
 app = Flask(__name__)
 CORS(app)
@@ -51,7 +54,7 @@ def filmdetails(film_id):
         })
     return jsonify(results)
 
-@app.route("/topactors/<int:actor_id>") # shows name and most rented films
+@app.route("/topactors/<int:actor_id>")
 def actordetails(actor_id):
     a_detail = actor_details(actor_id)
     results = []
@@ -65,6 +68,48 @@ def actordetails(actor_id):
             "rented": a[5]
         })
     return jsonify(results)
+
+@app.route("/films/search")
+def filmsearch():
+    query = request.args.get('query', '')
+    search_type = request.args.get('type', 'film')
+    
+    films = search_films(query, search_type)
+    results = []
+    for f in films:
+        results.append({
+            "film_id": f[0],
+            "title": f[1],
+            "release_year": f[2],
+            "rental_rate": f[3],
+            "available_copies": f[4]
+        })
+    return jsonify(results)
+
+@app.route("/customers")
+def customers():
+    custs = get_customers()
+    results = []
+    for c in custs:
+        results.append({
+            "customer_id": c[0],
+            "first_name": c[1],
+            "last_name": c[2]
+        })
+    return jsonify(results)
+
+@app.route("/rentals", methods=['POST'])
+def rentals():
+    data = request.get_json()
+    film_id = data.get('film_id')
+    customer_id = data.get('customer_id')
+    
+    rental_id = create_rental(film_id, customer_id)
+    
+    if rental_id:
+        return jsonify({"rental_id": rental_id, "message": "Rental created successfully"})
+    else:
+        return jsonify({"error": "No inventory available"}), 404
 
 
 if __name__ == "__main__":
