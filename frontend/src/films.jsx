@@ -31,7 +31,7 @@ function FilmPage() {
     <div className="centered">
         <h2>No films found.</h2>
   </div>
-    );
+    )
   }
 
   return (

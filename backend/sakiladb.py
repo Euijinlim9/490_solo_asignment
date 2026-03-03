@@ -4,7 +4,7 @@ def get_connection():
     return mysql.connector.connect( 
         host="localhost",
         user="root",
-        password="1234",
+        password="cs490",
         database="sakila"
     )
 
@@ -175,6 +175,75 @@ def actor_details(actor_id):
                        ORDER BY rented desc limit 5;
                        
     """, (actor_id,))
+    
+        result = cursor.fetchall() 
+        cursor.close()
+        conn.close()
+
+        return result;
+
+# anh's portion m3
+#filter / search customers by id, first name or last name
+
+def filter_customer():
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+                       SELECT customer_id, first_name, last_name
+                       FROM customer
+                       WHERE (:customer_id IS NULL OR customer_id = :customer_id) and
+                       (:first_name IS NULL OR first_name = :first_name) and
+                       (:last_name IS NULL OR last_name = :last_name)
+                       ORDER BY customer_id asc;
+                       
+    """,)
+    
+        result = cursor.fetchall() 
+        cursor.close()
+        conn.close()
+
+        return result;
+
+#view customer details and see past and present rental history
+def customer_details(customer_id):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+                       SELECT c.customer_id, c.first_name, c.last_name, c.email, r.rental_id, r.inventory_id
+                       r.rental_date, r.return_date
+                       FROM customer c
+                       JOIN rental r on r.customer_id = c.customer_id
+                       GROUP BY c.customer_id, c.first_name, c.last_name, c.email, r.rental_id, r.inventory_id
+                       r.rental_date, r.return_date;
+                       
+    """, (customer_id,))
+    
+        result = cursor.fetchall() 
+        cursor.close()
+        conn.close()
+
+        return result;
+
+#indicate that a customer has returned a rented movie
+def returned_movie(customer_id):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+                       SELECT c.customer_id, c.first_name, c.last_name
+                       CASE 
+                       WHERE EXISTS (
+                       SELECT 1
+                       FROM rental r
+                       WHERE r.customer_id = c.customer_id
+                       AND r.return_date IS NOT NULL
+                       )
+                       THEN 'Movie has been returned'
+                       ELSE 'Movie has not been returned'
+                       END as return_status
+                       FROM customers c;
+                       
+                       
+    """, (customer_id,))
     
         result = cursor.fetchall() 
         cursor.close()
