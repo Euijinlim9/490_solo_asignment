@@ -8,6 +8,7 @@ from sakiladb import search_films
 from sakiladb import get_customers
 from sakiladb import get_customers_paginated
 from sakiladb import add_customer
+from sakiladb import update_customer
 from sakiladb import create_rental
 
 app = Flask(__name__)
@@ -136,6 +137,17 @@ def add_customer_route():
     customer_id = add_customer(first_name, last_name, email, address_id, store_id)
     
     return jsonify({"customer_id": customer_id, "message": "Customer added successfully"})
+
+@app.route("/customers/update/<int:customer_id>", methods=['PUT'])
+def update_customer_route(customer_id):
+    data = request.get_json()
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    email = data.get('email')
+    
+    update_customer(customer_id, first_name, last_name, email)
+    
+    return jsonify({"message": "Customer updated successfully"})
 
 @app.route("/rentals", methods=['POST'])
 def rentals():

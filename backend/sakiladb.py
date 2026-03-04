@@ -116,6 +116,19 @@ def add_customer(first_name, last_name, email, address_id, store_id):
     conn.close()
     return customer_id
 
+def update_customer(customer_id, first_name, last_name, email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE customer
+        SET first_name = %s, last_name = %s, email = %s
+        WHERE customer_id = %s
+    """, (first_name, last_name, email, customer_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
 # jimmy's portion - create rental
 def create_rental(film_id, customer_id):
     conn = get_connection()
