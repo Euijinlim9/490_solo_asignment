@@ -221,12 +221,9 @@ def customer_details(customer_id):
         conn = get_connection()
         cursor = conn.cursor()
         cursor.execute("""
-                       SELECT c.customer_id, c.first_name, c.last_name, c.email, r.rental_id, r.inventory_id
-                       r.rental_date, r.return_date
+                       SELECT c.customer_id, c.first_name, c.last_name, c.email
                        FROM customer c
-                       JOIN rental r on r.customer_id = c.customer_id
-                       GROUP BY c.customer_id, c.first_name, c.last_name, c.email, r.rental_id, r.inventory_id
-                       r.rental_date, r.return_date;
+                       WHERE c.customer_id = %s;
                        
     """, (customer_id,))
     
@@ -235,6 +232,26 @@ def customer_details(customer_id):
         conn.close()
 
         return result;
+def customer_rentals(customer_id):
+        conn = get_connection()
+        cursor = conn.cursor()
+        cursor.execute("""
+                    SELECT f.film_id, f.title, r.rental_date, r.return_date
+                    FROM film f
+                    JOIN inventory i on f.film_id = i.film_id
+                    JOIN rental r on i.inventory_id = r.inventory_id
+                    WHERE r.customer_id = %s
+                    ORDER BY r.rental_date asc;
+                       
+                       
+    """, (customer_id,))
+    
+        result = cursor.fetchall() 
+        cursor.close()
+        conn.close()
+
+        return result;
+
 
 #indicate that a customer has returned a rented movie
 def returned_movie(customer_id):

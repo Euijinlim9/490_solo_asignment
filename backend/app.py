@@ -10,6 +10,7 @@ from sakiladb import create_rental
 from sakiladb import filter_customer
 from sakiladb import customer_details
 from sakiladb import returned_movie
+from sakiladb import customer_rentals
 
 app = Flask(__name__)
 CORS(app)
@@ -129,6 +130,26 @@ def customersearch():
             "active": f[3]
         })
     return jsonify(results)
+
+@app.route("/customer_search/<int:customer_id>")
+def customerdetails(customer_id):
+    rows = customer_details(customer_id)
+    a=rows[0]
+    customer_info = {
+            "customer_id": a[0],
+            "first_name": a[1],
+            "last_name": a[2],
+            "email": a[3]
+    }
+    rentals = customer_rentals(customer_id)
+    customer_info["rentals"] = [{
+        "film_id": r[0],
+        "title": r[1],
+        "rental_date":r[2].isoformat() if r[2] else None,
+        "return_date": r[3].isoformat() if r[3] else None
+    } for r in rentals
+    ]
+    return jsonify(customer_info)
 
 if __name__ == "__main__":
     app.run(debug=True)

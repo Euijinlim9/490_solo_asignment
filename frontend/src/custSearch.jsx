@@ -6,6 +6,7 @@ function CustomerSearchPage() {
   const [searchType, setSearchType] = useState('customer_id');
   const [customers, setCustomers] = useState([]);
   const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerRentals, setCustomerRentals] = useState([]);
 
   const handleSearch = (e) => {
     e.preventDefault();
@@ -14,10 +15,13 @@ function CustomerSearchPage() {
       .then(data => setCustomers(data));
   };
 
-    const handleViewDetails = (customerId) => {
-    fetch(`http://localhost:5000/customers/${customerId}`)
+    const handleViewDetails = (customer_id) => {
+    fetch(`http://localhost:5000/customer_search/${customer_id}`)
       .then(res => res.json())
-      .then(data => setSelectedCustomer(data));
+      .then(data => {
+        setSelectedCustomer(data);
+        setCustomerRentals(data.rentals || []);
+    })
   }; 
 
   return (
@@ -44,6 +48,7 @@ function CustomerSearchPage() {
         {customers.map((customers) => (
           <div className="film-card" key={customers.customer_id}>
             <h3>{customers.first_name} {customers.last_name}</h3>
+            <p>Customer ID: {customers.customer_id}</p>
             <p>Status: {customers.active === 1 ? "Active" : "Inactive"}</p>
             <button onClick={() => handleViewDetails(customers.customer_id)}>View Details</button>
           </div>
@@ -54,15 +59,22 @@ function CustomerSearchPage() {
         <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
           <div style={{ background: '#484848', color: 'white', padding: '30px', maxWidth: '600px', maxHeight: '80vh', overflow: 'auto', borderRadius: '10px' }}>
             <h2>{selectedCustomer.first_name} {selectedCustomer.last_name}</h2>
-            <p><strong>Store:</strong> {selectedCustomer.store_id}</p>
+            <p>Status: {selectedCustomer.active === 1 ? "Active" : "Inactive"}</p>
             <p><strong>Email:</strong> {selectedCustomer.email}</p>
-            <p><strong>Address:</strong> {selectedCustomer.address_id}</p>
+            {customerRentals.length === 0 ? (<p>No past rentals.</p>) : (
+                <ul>
+                    {customerRentals.map(r => (
+                        <li key={r.film_id}>
+                            {r.title} - Rented: {new Date(r.rental_date).toLocaleDateString()} | Returned: {r.return_date ? new Date(r.return_date).toLocaleDateString() : "Not returned yet"}
+                        </li>
+                    ))}
+                </ul>
+            )}
             <div style={{ marginTop: '20px' }}>
-              <button onClick={handleRentClick} style={{ marginRight: '10px' }}>Rent Film</button>
               <button onClick={() => setSelectedCustomer(null)}>Close</button>
             </div>
+            </div>
           </div>
-        </div>
       )}
     </div>
   );
