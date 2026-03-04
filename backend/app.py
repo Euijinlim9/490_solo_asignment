@@ -7,6 +7,7 @@ from sakiladb import actor_details
 from sakiladb import search_films
 from sakiladb import get_customers
 from sakiladb import get_customers_paginated
+from sakiladb import add_customer
 from sakiladb import create_rental
 
 app = Flask(__name__)
@@ -122,6 +123,19 @@ def customers_list():
         "per_page": per_page,
         "total_pages": (total + per_page - 1) // per_page
     })
+
+@app.route("/customers/add", methods=['POST'])
+def add_customer_route():
+    data = request.get_json()
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    email = data.get('email')
+    address_id = data.get('address_id', 1)
+    store_id = data.get('store_id', 1)
+    
+    customer_id = add_customer(first_name, last_name, email, address_id, store_id)
+    
+    return jsonify({"customer_id": customer_id, "message": "Customer added successfully"})
 
 @app.route("/rentals", methods=['POST'])
 def rentals():

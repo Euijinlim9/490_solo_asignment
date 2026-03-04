@@ -103,6 +103,19 @@ def get_customers_paginated(page, per_page):
     conn.close()
     return result, total
 
+def add_customer(first_name, last_name, email, address_id, store_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO customer (first_name, last_name, email, address_id, store_id, create_date, active)
+        VALUES (%s, %s, %s, %s, %s, NOW(), 1)
+    """, (first_name, last_name, email, address_id, store_id))
+    conn.commit()
+    customer_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return customer_id
+
 # jimmy's portion - create rental
 def create_rental(film_id, customer_id):
     conn = get_connection()

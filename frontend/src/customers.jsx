@@ -6,6 +6,12 @@ function CustomersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [showAddForm, setShowAddForm] = useState(false);
+  const [newCustomer, setNewCustomer] = useState({
+    first_name: '',
+    last_name: '',
+    email: ''
+  });
 
   useEffect(() => {
     fetchCustomers(page);
@@ -30,6 +36,22 @@ function CustomersPage() {
     if (page < totalPages) setPage(page + 1);
   };
 
+  const handleAddCustomer = (e) => {
+    e.preventDefault();
+    fetch('http://localhost:5000/customers/add', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(newCustomer)
+    })
+      .then(res => res.json())
+      .then(data => {
+        alert(data.message);
+        setShowAddForm(false);
+        setNewCustomer({ first_name: '', last_name: '', email: '' });
+        fetchCustomers(page);
+      });
+  };
+
   if (loading) {
     return <div className="centered"><h2>Loading customers...</h2></div>;
   }
@@ -37,6 +59,8 @@ function CustomersPage() {
   return (
     <div className="centered">
       <h1>Customers</h1>
+      
+      <button onClick={() => setShowAddForm(true)} style={{ marginBottom: '20px', padding: '10px 20px' }}>Add New Customer</button>
       
       <table style={{ width: '100%', maxWidth: '900px', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
@@ -66,6 +90,48 @@ function CustomersPage() {
         <span>Page {page} of {totalPages}</span>
         <button onClick={handleNextPage} disabled={page === totalPages}>Next</button>
       </div>
+
+      {showAddForm && (
+        <div style={{ position: 'fixed', top: 0, left: 0, right: 0, bottom: 0, background: 'rgba(0,0,0,0.5)', display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+          <div style={{ background: '#484848', color: 'white', padding: '30px', minWidth: '400px', borderRadius: '10px' }}>
+            <h2>Add New Customer</h2>
+            <form onSubmit={handleAddCustomer}>
+              <div style={{ marginBottom: '15px' }}>
+                <label>First Name:</label>
+                <input
+                  type="text"
+                  value={newCustomer.first_name}
+                  onChange={(e) => setNewCustomer({...newCustomer, first_name: e.target.value})}
+                  required
+                  style={{ width: '100%', padding: '8px', marginTop: '5px', color: 'white', background: '#333' }}
+                />
+              </div>
+              <div style={{ marginBottom: '15px' }}>
+                <label>Last Name:</label>
+                <input
+                  type="text"
+                  value={newCustomer.last_name}
+                  onChange={(e) => setNewCustomer({...newCustomer, last_name: e.target.value})}
+                  required
+                  style={{ width: '100%', padding: '8px', marginTop: '5px', color: 'white', background: '#333' }}
+                />
+              </div>
+              <div style={{ marginBottom: '15px' }}>
+                <label>Email:</label>
+                <input
+                  type="email"
+                  value={newCustomer.email}
+                  onChange={(e) => setNewCustomer({...newCustomer, email: e.target.value})}
+                  required
+                  style={{ width: '100%', padding: '8px', marginTop: '5px', color: 'white', background: '#333' }}
+                />
+              </div>
+              <button type="submit" style={{ marginRight: '10px' }}>Add Customer</button>
+              <button type="button" onClick={() => setShowAddForm(false)}>Cancel</button>
+            </form>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
