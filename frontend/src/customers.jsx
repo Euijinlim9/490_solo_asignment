@@ -6,6 +6,7 @@ function CustomersPage() {
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState('');
   const [showAddForm, setShowAddForm] = useState(false);
   const [showEditForm, setShowEditForm] = useState(false);
   const [editingCustomer, setEditingCustomer] = useState(null);
@@ -21,7 +22,8 @@ function CustomersPage() {
 
   const fetchCustomers = (pageNum) => {
     setLoading(true);
-    fetch(`http://localhost:5000/customers/list?page=${pageNum}&per_page=20`)
+    const searchParam = searchQuery ? `&search=${searchQuery}` : '';
+    fetch(`http://localhost:5000/customers/list?page=${pageNum}&per_page=20${searchParam}`)
       .then(res => res.json())
       .then(data => {
         setCustomers(data.customers);
@@ -79,6 +81,25 @@ function CustomersPage() {
       });
   };
 
+  const handleDeleteCustomer = (customerId) => {
+    if (window.confirm('Are you sure you want to delete this customer?')) {
+      fetch(`http://localhost:5000/customers/delete/${customerId}`, {
+        method: 'DELETE'
+      })
+        .then(res => res.json())
+        .then(data => {
+          alert(data.message);
+          fetchCustomers(page);
+        });
+    }
+  };
+
+  const handleSearch = (e) => {
+    e.preventDefault();
+    setPage(1);
+    fetchCustomers(1);
+  };
+
   if (loading) {
     return <div className="centered"><h2>Loading customers...</h2></div>;
   }
@@ -87,7 +108,20 @@ function CustomersPage() {
     <div className="centered">
       <h1>Customers</h1>
       
-      <button onClick={() => setShowAddForm(true)} style={{ marginBottom: '20px', padding: '10px 20px' }}>Add New Customer</button>
+      <div style={{ display: 'flex', gap: '10px', marginBottom: '20px', alignItems: 'center' }}>
+        <form onSubmit={handleSearch} style={{ display: 'flex', gap: '10px' }}>
+          <input
+            type="text"
+            value={searchQuery}
+            onChange={(e) => setSearchQuery(e.target.value)}
+            placeholder="Search by ID, first name, or last name..."
+            style={{ padding: '8px', width: '300px' }}
+          />
+          <button type="submit">Search</button>
+          <button type="button" onClick={() => { setSearchQuery(''); setPage(1); fetchCustomers(1); }}>Clear</button>
+        </form>
+        <button onClick={() => setShowAddForm(true)} style={{ padding: '8px 16px' }}>Add New Customer</button>
+      </div>
       
       <table style={{ width: '100%', maxWidth: '900px', borderCollapse: 'collapse', marginTop: '20px' }}>
         <thead>
@@ -110,6 +144,7 @@ function CustomersPage() {
               <td style={{ padding: '10px' }}>{customer.active ? 'Active' : 'Inactive'}</td>
               <td style={{ padding: '10px' }}>
                 <button onClick={() => handleEditClick(customer)} style={{ marginRight: '5px' }}>Edit</button>
+                <button onClick={() => handleDeleteCustomer(customer.customer_id)}>Delete</button>
               </td>
             </tr>
           ))}

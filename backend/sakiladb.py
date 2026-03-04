@@ -91,12 +91,37 @@ def get_customers_paginated(page, per_page):
     cursor.execute("""
         SELECT customer_id, first_name, last_name, email, active
         FROM customer
+        WHERE active = 1
         ORDER BY last_name, first_name
         LIMIT %s OFFSET %s
     """, (per_page, offset))
     result = cursor.fetchall()
     
-    cursor.execute("SELECT COUNT(*) FROM customer")
+    cursor.execute("SELECT COUNT(*) FROM customer WHERE active = 1")
+    total = cursor.fetchone()[0]
+    
+    cursor.close()
+    conn.close()
+    return result, total
+
+def search_customers(search_query, page, per_page):
+    conn = get_connection()
+    cursor = conn.cursor()
+    offset = (page - 1) * per_page
+    
+    cursor.execute("""
+        SELECT customer_id, first_name, last_name, email, active
+        FROM customer
+        WHERE (customer_id LIKE %s OR first_name LIKE %s OR last_name LIKE %s) AND active = 1
+        ORDER BY last_name, first_name
+        LIMIT %s OFFSET %s
+    """, (f'%{search_query}%', f'%{search_query}%', f'%{search_query}%', per_page, offset))
+    result = cursor.fetchall()
+    
+    cursor.execute("""
+        SELECT COUNT(*) FROM customer
+        WHERE (customer_id LIKE %s OR first_name LIKE %s OR last_name LIKE %s) AND active = 1
+    """, (f'%{search_query}%', f'%{search_query}%', f'%{search_query}%'))
     total = cursor.fetchone()[0]
     
     cursor.close()
@@ -124,6 +149,15 @@ def update_customer(customer_id, first_name, last_name, email):
         SET first_name = %s, last_name = %s, email = %s
         WHERE customer_id = %s
     """, (first_name, last_name, email, customer_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def delete_customer(customer_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE customer SET active = 0 WHERE customer_id = %s", (customer_id,))
     conn.commit()
     cursor.close()
     conn.close()

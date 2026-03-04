@@ -7,8 +7,10 @@ from sakiladb import actor_details
 from sakiladb import search_films
 from sakiladb import get_customers
 from sakiladb import get_customers_paginated
+from sakiladb import search_customers
 from sakiladb import add_customer
 from sakiladb import update_customer
+from sakiladb import delete_customer
 from sakiladb import create_rental
 
 app = Flask(__name__)
@@ -105,8 +107,13 @@ def customers():
 def customers_list():
     page = int(request.args.get('page', 1))
     per_page = int(request.args.get('per_page', 20))
+    search_query = request.args.get('search', '')
     
-    custs, total = get_customers_paginated(page, per_page)
+    if search_query:
+        custs, total = search_customers(search_query, page, per_page)
+    else:
+        custs, total = get_customers_paginated(page, per_page)
+    
     results = []
     for c in custs:
         results.append({
@@ -148,6 +155,11 @@ def update_customer_route(customer_id):
     update_customer(customer_id, first_name, last_name, email)
     
     return jsonify({"message": "Customer updated successfully"})
+
+@app.route("/customers/delete/<int:customer_id>", methods=['DELETE'])
+def delete_customer_route(customer_id):
+    delete_customer(customer_id)
+    return jsonify({"message": "Customer deleted successfully"})
 
 @app.route("/rentals", methods=['POST'])
 def rentals():
