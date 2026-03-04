@@ -7,6 +7,7 @@ import ActorPage from "./actors";
 import ActorDetails from "./actorDetails";
 import FilmDetails from "./filmDetails";
 import FilmsSearchPage from "./filmsSearch";
+import CustomerSearchPage from "./custSearch";
 
 function App() {
   return (
@@ -19,6 +20,7 @@ function App() {
         <Route path="/topactors/:actor_id" element={<ActorDetails />} />
         <Route path="/topfilms/:film_id" element={<FilmDetails />} />
         <Route path="/films" element={<FilmsSearchPage />} />
+        <Route path="/customer_search" element={<CustomerSearchPage />} />
       </Routes>
     </BrowserRouter>
   );

@@ -7,6 +7,9 @@ from sakiladb import actor_details
 from sakiladb import search_films
 from sakiladb import get_customers
 from sakiladb import create_rental
+from sakiladb import filter_customer
+from sakiladb import customer_details
+from sakiladb import returned_movie
 
 app = Flask(__name__)
 CORS(app)
@@ -111,6 +114,21 @@ def rentals():
     else:
         return jsonify({"error": "No inventory available"}), 404
 
+@app.route("/customer_search/search")
+def customersearch():
+    query = request.args.get('query', '')
+    search_type = request.args.get('type', '')
+    
+    customer = filter_customer(query, search_type)
+    results = []
+    for f in customer:
+        results.append({
+            "customer_id": f[0],
+            "first_name": f[1],
+            "last_name": f[2],
+            "active": f[3]
+        })
+    return jsonify(results)
 
 if __name__ == "__main__":
     app.run(debug=True)

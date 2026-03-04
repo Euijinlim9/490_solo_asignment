@@ -185,18 +185,30 @@ def actor_details(actor_id):
 # anh's portion m3
 #filter / search customers by id, first name or last name
 
-def filter_customer():
+def filter_customer(query, search_type):
         conn = get_connection()
         cursor = conn.cursor()
-        cursor.execute("""
-                       SELECT customer_id, first_name, last_name
-                       FROM customer
-                       WHERE (:customer_id IS NULL OR customer_id = :customer_id) and
-                       (:first_name IS NULL OR first_name = :first_name) and
-                       (:last_name IS NULL OR last_name = :last_name)
-                       ORDER BY customer_id asc;
-                       
-    """,)
+
+        if search_type == 'customer_id':
+            cursor.execute("""
+            SELECT customer_id, first_name, last_name, active
+            FROM customer c
+            WHERE customer_id LIKE %s
+        """, (f'%{query}%',))
+
+        elif search_type == 'first_name':
+            cursor.execute("""
+            SELECT customer_id, first_name, last_name, active
+            FROM customer c
+            WHERE first_name LIKE %s
+        """, (f'%{query}%',))
+        elif search_type == 'last_name':
+            cursor.execute("""
+            SELECT customer_id, first_name, last_name, active
+            FROM customer c
+            WHERE last_name LIKE %s
+        """, (f'%{query}%',))
+    
     
         result = cursor.fetchall() 
         cursor.close()
