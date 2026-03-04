@@ -84,6 +84,85 @@ def get_customers():
     conn.close()
     return result
 
+def get_customers_paginated(page, per_page):
+    conn = get_connection()
+    cursor = conn.cursor()
+    offset = (page - 1) * per_page
+    cursor.execute("""
+        SELECT customer_id, first_name, last_name, email, active
+        FROM customer
+        WHERE active = 1
+        ORDER BY last_name, first_name
+        LIMIT %s OFFSET %s
+    """, (per_page, offset))
+    result = cursor.fetchall()
+    
+    cursor.execute("SELECT COUNT(*) FROM customer WHERE active = 1")
+    total = cursor.fetchone()[0]
+    
+    cursor.close()
+    conn.close()
+    return result, total
+
+def search_customers(search_query, page, per_page):
+    conn = get_connection()
+    cursor = conn.cursor()
+    offset = (page - 1) * per_page
+    
+    cursor.execute("""
+        SELECT customer_id, first_name, last_name, email, active
+        FROM customer
+        WHERE (customer_id LIKE %s OR first_name LIKE %s OR last_name LIKE %s) AND active = 1
+        ORDER BY last_name, first_name
+        LIMIT %s OFFSET %s
+    """, (f'%{search_query}%', f'%{search_query}%', f'%{search_query}%', per_page, offset))
+    result = cursor.fetchall()
+    
+    cursor.execute("""
+        SELECT COUNT(*) FROM customer
+        WHERE (customer_id LIKE %s OR first_name LIKE %s OR last_name LIKE %s) AND active = 1
+    """, (f'%{search_query}%', f'%{search_query}%', f'%{search_query}%'))
+    total = cursor.fetchone()[0]
+    
+    cursor.close()
+    conn.close()
+    return result, total
+
+def add_customer(first_name, last_name, email, address_id, store_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        INSERT INTO customer (first_name, last_name, email, address_id, store_id, create_date, active)
+        VALUES (%s, %s, %s, %s, %s, NOW(), 1)
+    """, (first_name, last_name, email, address_id, store_id))
+    conn.commit()
+    customer_id = cursor.lastrowid
+    cursor.close()
+    conn.close()
+    return customer_id
+
+def update_customer(customer_id, first_name, last_name, email):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("""
+        UPDATE customer
+        SET first_name = %s, last_name = %s, email = %s
+        WHERE customer_id = %s
+    """, (first_name, last_name, email, customer_id))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
+def delete_customer(customer_id):
+    conn = get_connection()
+    cursor = conn.cursor()
+    cursor.execute("UPDATE customer SET active = 0 WHERE customer_id = %s", (customer_id,))
+    conn.commit()
+    cursor.close()
+    conn.close()
+    return True
+
 # jimmy's portion - create rental
 def create_rental(film_id, customer_id):
     conn = get_connection()

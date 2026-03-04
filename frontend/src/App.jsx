@@ -7,7 +7,11 @@ import ActorPage from "./actors";
 import ActorDetails from "./actorDetails";
 import FilmDetails from "./filmDetails";
 import FilmsSearchPage from "./filmsSearch";
+<<<<<<< HEAD
 import CustomerSearchPage from "./custSearch";
+=======
+import CustomersPage from "./customers";
+>>>>>>> origin/jimmy-dev
 
 function App() {
   return (
@@ -20,7 +24,11 @@ function App() {
         <Route path="/topactors/:actor_id" element={<ActorDetails />} />
         <Route path="/topfilms/:film_id" element={<FilmDetails />} />
         <Route path="/films" element={<FilmsSearchPage />} />
+<<<<<<< HEAD
         <Route path="/customer_search" element={<CustomerSearchPage />} />
+=======
+        <Route path="/customers" element={<CustomersPage />} />
+>>>>>>> origin/jimmy-dev
       </Routes>
     </BrowserRouter>
   );

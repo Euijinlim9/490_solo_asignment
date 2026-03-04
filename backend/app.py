@@ -6,6 +6,11 @@ from sakiladb import rented_details
 from sakiladb import actor_details
 from sakiladb import search_films
 from sakiladb import get_customers
+from sakiladb import get_customers_paginated
+from sakiladb import search_customers
+from sakiladb import add_customer
+from sakiladb import update_customer
+from sakiladb import delete_customer
 from sakiladb import create_rental
 from sakiladb import filter_customer
 from sakiladb import customer_details
@@ -101,6 +106,64 @@ def customers():
             "last_name": c[2]
         })
     return jsonify(results)
+
+@app.route("/customers/list")
+def customers_list():
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 20))
+    search_query = request.args.get('search', '')
+    
+    if search_query:
+        custs, total = search_customers(search_query, page, per_page)
+    else:
+        custs, total = get_customers_paginated(page, per_page)
+    
+    results = []
+    for c in custs:
+        results.append({
+            "customer_id": c[0],
+            "first_name": c[1],
+            "last_name": c[2],
+            "email": c[3],
+            "active": c[4]
+        })
+    
+    return jsonify({
+        "customers": results,
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "total_pages": (total + per_page - 1) // per_page
+    })
+
+@app.route("/customers/add", methods=['POST'])
+def add_customer_route():
+    data = request.get_json()
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    email = data.get('email')
+    address_id = data.get('address_id', 1)
+    store_id = data.get('store_id', 1)
+    
+    customer_id = add_customer(first_name, last_name, email, address_id, store_id)
+    
+    return jsonify({"customer_id": customer_id, "message": "Customer added successfully"})
+
+@app.route("/customers/update/<int:customer_id>", methods=['PUT'])
+def update_customer_route(customer_id):
+    data = request.get_json()
+    first_name = data.get('first_name')
+    last_name = data.get('last_name')
+    email = data.get('email')
+    
+    update_customer(customer_id, first_name, last_name, email)
+    
+    return jsonify({"message": "Customer updated successfully"})
+
+@app.route("/customers/delete/<int:customer_id>", methods=['DELETE'])
+def delete_customer_route(customer_id):
+    delete_customer(customer_id)
+    return jsonify({"message": "Customer deleted successfully"})
 
 @app.route("/rentals", methods=['POST'])
 def rentals():
