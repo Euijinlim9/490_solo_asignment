@@ -6,6 +6,7 @@ from sakiladb import rented_details
 from sakiladb import actor_details
 from sakiladb import search_films
 from sakiladb import get_customers
+from sakiladb import get_customers_paginated
 from sakiladb import create_rental
 
 app = Flask(__name__)
@@ -97,6 +98,30 @@ def customers():
             "last_name": c[2]
         })
     return jsonify(results)
+
+@app.route("/customers/list")
+def customers_list():
+    page = int(request.args.get('page', 1))
+    per_page = int(request.args.get('per_page', 20))
+    
+    custs, total = get_customers_paginated(page, per_page)
+    results = []
+    for c in custs:
+        results.append({
+            "customer_id": c[0],
+            "first_name": c[1],
+            "last_name": c[2],
+            "email": c[3],
+            "active": c[4]
+        })
+    
+    return jsonify({
+        "customers": results,
+        "total": total,
+        "page": page,
+        "per_page": per_page,
+        "total_pages": (total + per_page - 1) // per_page
+    })
 
 @app.route("/rentals", methods=['POST'])
 def rentals():

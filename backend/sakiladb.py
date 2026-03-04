@@ -84,6 +84,25 @@ def get_customers():
     conn.close()
     return result
 
+def get_customers_paginated(page, per_page):
+    conn = get_connection()
+    cursor = conn.cursor()
+    offset = (page - 1) * per_page
+    cursor.execute("""
+        SELECT customer_id, first_name, last_name, email, active
+        FROM customer
+        ORDER BY last_name, first_name
+        LIMIT %s OFFSET %s
+    """, (per_page, offset))
+    result = cursor.fetchall()
+    
+    cursor.execute("SELECT COUNT(*) FROM customer")
+    total = cursor.fetchone()[0]
+    
+    cursor.close()
+    conn.close()
+    return result, total
+
 # jimmy's portion - create rental
 def create_rental(film_id, customer_id):
     conn = get_connection()

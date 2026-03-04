@@ -15,6 +15,7 @@ function Header() {
         <Link to="/topfilms"><button>Top 5 Films</button></Link>
         <Link to="/topactors"><button>Top 5 Actors</button></Link>
         <Link to="/films"><button>Search Films</button></Link>
+        <Link to="/customers"><button>Customers</button></Link>
       </nav>
       </div>
     </header>
